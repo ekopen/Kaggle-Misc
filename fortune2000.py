@@ -20,9 +20,6 @@ newColumns = ['Revenue per Employee', 'Profits per Employee', 'Market Value per 
 
 print(calcColumns)
 
-#figure out a way to loop through both arrays at the same time
-# for x in newColumns,  :
-#     for y in calcColumns
-#     df[x] = (float(df[calcColumns]) / float(df['Total Employees'])) * 1000000000
 
-print(df.info())
+for x,y in zip(newColumns,calcColumns):
+    df[x] = (df[y] / (df['Total Employees'])) * 1000000000
