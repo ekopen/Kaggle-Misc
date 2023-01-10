@@ -18,8 +18,12 @@ for x in calcColumns:
 calcColumns = calcColumns[:-1]
 newColumns = ['Revenue per Employee', 'Profits per Employee', 'Market Value per Employee']
 
-print(calcColumns)
-
-
 for x,y in zip(newColumns,calcColumns):
     df[x] = (df[y] / (df['Total Employees'])) * 1000000000
+
+print(df.info())
+
+print(df[['Organization Name','Revenue per Employee']])
+
+
+
