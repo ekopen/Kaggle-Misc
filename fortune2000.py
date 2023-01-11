@@ -23,7 +23,8 @@ for x,y in zip(newColumns,calcColumns):
 
 print(df.info())
 
-print(df[['Organization Name','Revenue per Employee']])
+pd.options.display.float_format = '${:0,.0f}'.format
 
+print(df[['Organization Name','Profits per Employee']])
 
 
