@@ -18,27 +18,17 @@ for x in calcColumns:
 
 #filtering out holding companies with low employee count (these have weird metrics that skew the analysis)
 # and any non-US companies (not sure what their reporting standards are)
-dffiltered = df[(df['Total Employees']>1000) & (df['Country']=='United States')]
+# also grouping by industry
+dffiltered1 = df[(df['Total Employees']>1000) & (df['Country']=='United States')]
+dffiltered2 = dffiltered1[['Industry','Revenue (Billions)','Profits (Billions)',
+                           'Market Value (Billions)','Total Employees']].groupby('Industry').agg('sum')
 
 # establishing columns to be used in calculations and performing the calc below
 calcColumns = calcColumns[:-1]
 newColumns = ['Revenue per Employee', 'Profits per Employee', 'Market Value per Employee']
 for x,y in zip(newColumns,calcColumns):
-    dffiltered[x] = (dffiltered[y] / (df['Total Employees'])) * 1000000000
-
-# checking to make things look right
-# print(dffiltered.info())
-print(dffiltered)
-
-#SOMETHING ISNT WORKING!!!!!!
-dfsummary = dffiltered[['Organization Name', 'Industry', 'Total Employees', 'Profits (Billions)', 'Revenue per Employee',
-                      'Profits per Employee', 'Market Value per Employee']].groupby([
-                        'Industry']).sum(['Revenue per Employee','Total Employees', 'Profits (Billions)',
-                                          'Profits per Employee', 'Market Value per Employee']).sort_values(by=[
-                                            'Profits per Employee'],ascending=False)
+    dffiltered2[x] = (dffiltered2[y] / (dffiltered2['Total Employees'])) * 1000000000
 
 pd.options.display.float_format = '${:0,.0f}'.format
-print(dfsummary)
 
-# df.plot(kind='bar', x='Date', y='Random Walk')
-# plt.show()
+print(dffiltered2)
