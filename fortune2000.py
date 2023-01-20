@@ -36,12 +36,15 @@ def analysis1(df):
     return df
 
 def analysis2(df, top_industry):
+    # THIS ISNT WORKING!!!!!!
     df = df.filter(items = ['Diversified Financials'], axis=0)
     return df
 
 df_cleaned_filtered = data_clean_filter(df_original)
 df_grouped_analysis = analysis1(df_cleaned_filtered)
 top_industry = df_grouped_analysis.head(1)
+
+#THIS ISNT WORKING!!!!!!
 df_top_industry = analysis2(df_cleaned_filtered, top_industry)
 
 
