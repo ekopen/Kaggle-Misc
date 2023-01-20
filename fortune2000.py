@@ -29,6 +29,10 @@ newColumns = ['Revenue per Employee', 'Profits per Employee', 'Market Value per 
 for x,y in zip(newColumns,calcColumns):
     dffiltered2[x] = (dffiltered2[y] / (dffiltered2['Total Employees'])) * 1000000000
 
+dffiltered3 = dffiltered2.sort_values(by=['Profits per Employee'], ascending=False)
+
 pd.options.display.float_format = '${:0,.0f}'.format
 
-print(dffiltered2)
+dffinal = dffiltered3
+
+print(dffinal)
