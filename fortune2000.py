@@ -22,31 +22,41 @@ def data_clean_filter(df):
     df = df[(df['Total Employees']>1000) & (df['Country']=='United States')]
     return df
 
+def calculate_columns(df):
+    #creating some calculation columns
+    calc_Columns = ['Revenue (Billions)','Profits (Billions)','Market Value (Billions)']
+    newColumns = ['Revenue per Employee', 'Profits per Employee', 'Market Value per Employee']
+    #kept getting some stupid, hateful warning from pandas without copying a new df, so that's why I am doing that
+    dfnew = df.copy()
+    for x,y in zip(newColumns,calc_Columns):
+        dfnew[x] = (dfnew[y] / (dfnew['Total Employees'])) * 1000000000
+    return dfnew
+
 def analysis1(df):
     # attempting to analyze financial metrics by employee over each industry
     # group by industry
     df = df[['Industry','Revenue (Billions)','Profits (Billions)','Market Value (Billions)',
          'Total Employees']].groupby('Industry').agg('sum')
     # establishing columns to be used in calculations and performing the calc below
-    calc_Columns = ['Revenue (Billions)','Profits (Billions)','Market Value (Billions)']
-    newColumns = ['Revenue per Employee', 'Profits per Employee', 'Market Value per Employee']
-    for x,y in zip(newColumns,calc_Columns):
-        df[x] = (df[y] / (df['Total Employees'])) * 1000000000
+    df = calculate_columns(df)
     df = df.sort_values(by=['Profits per Employee'], ascending=False)
     return df
 
-def analysis2(df, top_industry):
-    # THIS ISNT WORKING!!!!!!
-    df = df.filter(items = ['Diversified Financials'], axis=0)
+def analysis2(df, industry):
+    #creating a way to drill down into certain industries
+    df = df[df['Industry'] == industry]
+    df = calculate_columns(df)
+    df = df.sort_values(by=['Profits per Employee'], ascending=False)
     return df
 
+
 df_cleaned_filtered = data_clean_filter(df_original)
-df_grouped_analysis = analysis1(df_cleaned_filtered)
-top_industry = df_grouped_analysis.head(1)
 
-#THIS ISNT WORKING!!!!!!
-df_top_industry = analysis2(df_cleaned_filtered, top_industry)
+DF_grouped_analysis = analysis1(df_cleaned_filtered)
 
+print("The five MOST profitable industries per employee are: " +  str((DF_grouped_analysis.index.tolist()[0:5])))
+print("The five LEAST profitable industries per employee are: " +  str((DF_grouped_analysis.index.tolist()[-5:])))
 
-
-
+print("Select one industry to retrieve a dataframe for: ")
+industry_specifier = input()
+DF_detailed_industry_analysis = analysis2(df_cleaned_filtered, industry_specifier)
