@@ -2,15 +2,17 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 pd.options.display.float_format = '${:0,.0f}'.format
+#I know I shouldnt be doing this, but I am not patient enough right now to figure out why I kept getting these warnings
+pd.options.mode.chained_assignment = None  # default='warn'
 
 # read in the data
-pd.read_csv(r'C:\Users\ekopen\Documents\Kaggle\Forbes_2000_top_company_CLNQ11.csv').to_pickle("./fortune2000.pkl")
-df_original = pd.read_pickle("fortune2000.pkl")
+pd.read_csv(r'C:\Users\ekopen\Documents\Kaggle\Forbes_2000_top_company_CLNQ11.csv').to_pickle('./fortune2000.pkl')
+df_original = pd.read_pickle('fortune2000.pkl')
 
 def data_clean_filter(df):
     # there was an issue with weird brackets in the employee column (column 10) so getting ride of these
     for x in range(len(df.index)):
-        if df.iloc[x,10][-1] == "]":
+        if df.iloc[x,10][-1] == ']':
             df.iloc[x,10] = df.iloc[x,10][:-1]
     # converting some columns to float values so they can be used in formulas
     dirty_Columns = ['Revenue (Billions)','Profits (Billions)','Market Value (Billions)','Total Employees']
@@ -18,25 +20,54 @@ def data_clean_filter(df):
         df[x] = pd.to_numeric(df[x])
     #filtering out holding companies with low employee count (these have weird metrics that skew the analysis)
     # and any non-US companies (not sure what their reporting standards are)
-    # also grouping by industry
-    df = df[(df['Total Employees']>1000) & (df['Country']=='United States')]
+    # filtering out automotive which only has two companies for some reason
+    df = df[(df['Total Employees']>1000) & (df['Country']=='United States') & (df['Industry'] != 'Automotive')]
+    # creating nicknames for the columns, as industry names are a bit long
+    df['Industry Nickname'] = df['Industry']
+    df['Industry Nickname'] = df['Industry Nickname'].replace({
+        'Diversified Financials' : 'Finance',
+        'Oil & Gas Operations': 'Oil',
+        'Semiconductors': 'Chips',
+        'IT Software & Services': 'IT',
+        'Technology Hardware & Equipment': 'Tech Hardware',
+        'Drugs & Biotechnology': 'Biotech',
+        'Banking': 'Banking',
+        'Telecommunications Services': 'Telecomm',
+        'Chemicals': 'Chemicals',
+        'Utilities': 'Utilities',
+        'Insurance': 'Insurance',
+        'Business Services & Supplies': 'Biz Supplies',
+        'Materials': 'Materials',
+        'Household & Personal Products': 'Household Items',
+        'Conglomerates': 'Conglomerates',
+        'Food, Drink & Tobacco': 'Food, Drink & Tobacco',
+        'Media': 'Media',
+        'Capital Goods': 'Capital Goods',
+        'Construction': 'Construction',
+        'Aerospace & Defense': 'Aero/Defense',
+        'Health Care Equipment & Services': 'Healthcare Support',
+        'Trading Companies': 'Commodity Trading',
+        'Consumer Durables': 'CHECK',
+        'Transportation': 'Transport',
+        'Retailing': 'Retail',
+        'Food Markets': 'Food',
+        'Hotels, Restaurants & Leisure': 'Leisure' })
     return df
 
 def calculate_columns(df):
     #creating some calculation columns
     calc_Columns = ['Revenue (Billions)','Profits (Billions)','Market Value (Billions)']
     newColumns = ['Revenue per Employee', 'Profits per Employee', 'Market Value per Employee']
-    #kept getting some stupid, hateful warning from pandas without copying a new df, so that's why I am doing that
-    dfnew = df.copy()
     for x,y in zip(newColumns,calc_Columns):
-        dfnew[x] = (dfnew[y] / (dfnew['Total Employees'])) * 1000000000
-    return dfnew
+        df[x] = (df[y] / (df['Total Employees'])) * 1000000000
+    return df
 
 def analysis1(df):
     # attempting to analyze financial metrics by employee over each industry
     # group by industry
-    df = df[['Industry','Revenue (Billions)','Profits (Billions)','Market Value (Billions)',
-         'Total Employees']].groupby('Industry').agg('sum')
+    # the industry nickname is throwing an error here.... i think it is based on how i renamed it? Not sure
+    df = df[['Industry','Industry Nickname','Revenue (Billions)','Profits (Billions)','Market Value (Billions)',
+         'Total Employees']].groupby('Industry Nickname').agg('sum')
     # establishing columns to be used in calculations and performing the calc below
     df = calculate_columns(df)
     df = df.sort_values(by=['Profits per Employee'], ascending=False)
@@ -54,9 +85,18 @@ df_cleaned_filtered = data_clean_filter(df_original)
 
 DF_grouped_analysis = analysis1(df_cleaned_filtered)
 
-print("The five MOST profitable industries per employee are: " +  str((DF_grouped_analysis.index.tolist()[0:5])))
-print("The five LEAST profitable industries per employee are: " +  str((DF_grouped_analysis.index.tolist()[-5:])))
+print('The five MOST profitable industries per employee are: ' +  str((DF_grouped_analysis.index.tolist()[0:5])))
+print('The five LEAST profitable industries per employee are: ' +  str((DF_grouped_analysis.index.tolist()[-5:])))
 
-print("Select one industry to retrieve a dataframe for: ")
-industry_specifier = input()
-DF_detailed_industry_analysis = analysis2(df_cleaned_filtered, industry_specifier)
+for x in range(len(DF_grouped_analysis.index)):
+    print(DF_grouped_analysis.index.tolist()[x])
+
+bar = DF_grouped_analysis['Profits per Employee'].plot(x='Industry', y='Profit/Employee', kind='bar')
+
+# df = pd.DataFrame({'lab':['A', 'B', 'C'], 'val':[10, 30, 20]})
+# ax = df.plot.bar(x='lab', y='val', rot=0)
+
+
+# print('Select one industry to retrieve a dataframe for: ')
+# industry_specifier = input()
+# DF_detailed_industry_analysis = analysis2(df_cleaned_filtered, industry_specifier)
