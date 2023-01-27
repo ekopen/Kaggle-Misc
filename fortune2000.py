@@ -84,12 +84,13 @@ def analysis2(df, industry):
 def analysis3(df):
     # top # of companies by industry
     df = df[['Organization Name','Industry Nickname','Revenue (Billions)','Profits (Billions)','Market Value (Billions)',
-         'Total Employees']].groupby('Industry Nickname').head(5)
+         'Total Employees']].groupby('Industry Nickname').head(5).reset_index().reset_index()
     df = calculate_columns(df)
-    df = df.sort_values(by=['Industry Nickname','Profits per Employee'], ascending=[True,False]).reset_index()
+    # df = df.sort_values(by=['Industry Nickname','Profits per Employee'], ascending=[True,False])
     #I WANT TO SORT THIS BY PROFIT PER EMPOYEE OF COMPANIES USING THE MAP FUNCTION
+    #df.set_index("name", inplace = True)
     dfgrouped = df.groupby('Industry Nickname').agg('sum')
-    return dfgrouped
+    return df
 
 
 df_cleaned_filtered = data_clean_filter(df_original)
