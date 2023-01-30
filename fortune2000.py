@@ -53,7 +53,6 @@ def data_clean_filter(df):
         'Retailing': 'Retail',
         'Food Markets': 'Food',
         'Hotels, Restaurants & Leisure': 'Leisure' })
-    df = df.sort_values(by=['Total Employees'], ascending=False)
     return df
 
 def calculate_columns(df):
@@ -74,46 +73,70 @@ def analysis1(df):
     dfa1 = dfa1.sort_values(by=['Profits per Employee'], ascending=False).reset_index()
     return dfa1
 
-def analysis2(df, industry):
-    #creating a way to drill down into certain industries
-    dfa2 = df[df['Industry'] == industry]
-    dfa2 = calculate_columns(dfa2)
-    dfa2 = dfa2.sort_values(by=['Profits per Employee'], ascending=False)
-    return dfa2
-
 def analysis3(df):
     # top # of companies by industry
     dfgrouped = analysis1(df)
     num_top_companies = 5
+    dfa3 = calculate_columns(df).sort_values(by=['Profits per Employee'], ascending=False)
     #get top 'x'' companies by industry and add some calculated columns
-    dfa3 = df[['Organization Name','Industry Nickname','Revenue (Billions)','Profits (Billions)','Market Value (Billions)',
+    dfa3 = dfa3[['Organization Name','Industry Nickname','Revenue (Billions)','Profits (Billions)','Market Value (Billions)',
          'Total Employees']].groupby('Industry Nickname').head(num_top_companies)
-    dfa3 = calculate_columns(df)
+    dfa3 = calculate_columns(dfa3)
 
     dfgrouped = dfgrouped['Industry Nickname'].to_dict()
     dfgrouped_inv = {v: k for k, v in dfgrouped.items()}
 
     dfa3['Industry Rank'] = dfa3['Industry Nickname'].map(dfgrouped_inv)
-    df_a3 = dfa3.sort_values(by=['Industry Rank','Profits per Employee'], ascending=[True, False])
+    dfa3 = dfa3.sort_values(by=['Industry Rank','Profits per Employee'], ascending=[True, False])
 
-    return df_a3
-
-
+    return dfa3
 
 df_cleaned_filtered = data_clean_filter(df_original)
 
-DF_grouped_analysis = analysis1(df_cleaned_filtered)
-DF_grouped_analysis_2 = analysis3(df_cleaned_filtered)
+df_grouped_industries = analysis1(df_cleaned_filtered)
 
-print('The five MOST profitable industries per employee are: ' +  str((DF_grouped_analysis
+print('The five MOST profitable industries per employee are: ' +  str((df_grouped_industries
                                                                        ['Industry Nickname'].tolist()[0:5])))
-print('The five LEAST profitable industries per employee are: ' +  str((DF_grouped_analysis
+print('The five LEAST profitable industries per employee are: ' +  str((df_grouped_industries
                                                                         ['Industry Nickname'].tolist()[-5:])))
 
-# bar = DF_grouped_analysis['Profits per Employee'].plot(x='Industry', y='Profit/Employee', kind='bar')
+industries = df_grouped_industries['Industry Nickname']
+profit_employee = df_grouped_industries['Profits per Employee']
+fig, ax = plt.subplots(figsize =(16, 9))
+ax.barh(industries, profit_employee)
+ax.set_title('Industries by average profit per employee',
+             loc ='left' )
+ax.xaxis.set_major_formatter('${x:1,.0f}')
+plt.show()
 
+# df_gi_dict = df_grouped_industries.set_index('Industry Nickname')['Profits per Employee'].to_dict()
 #
+# industries = list(df_gi_dict.keys())
+# profit_per_employee = list(df_gi_dict.values())
 #
+# fig = plt.figure(figsize=(10, 5))
+#
+# # creating the bar plot
+# plt.bar(industries, profit_per_employee, color='maroon',
+#         width=0.4)
+#
+# plt.xlabel("Industries")
+# plt.ylabel("Profit per Employee")
+# plt.title("Profit per Employee by Industry")
+# plt.inverse_yaxis()
+# plt.show()
+
+
 # print('Select one industry to retrieve a dataframe for: ')
 # industry_specifier = input()
-# DF_detailed_industry_analysis = analysis2(df_cleaned_filtered, industry_specifier)
+# def analysis2(df, industry):
+#     #creating a way to drill down into certain industries
+#     dfa2 = df[df['Industry Nickname'] == industry]
+#     dfa2 = calculate_columns(dfa2)
+#     dfa2 = dfa2.sort_values(by=['Profits per Employee'], ascending=False)
+#     return dfa2
+# df_specific_industry_analysis = analysis2(df_cleaned_filtered, industry_specifier)
+
+df_top_5_companies_by_industry = analysis3(df_cleaned_filtered)
+
+
