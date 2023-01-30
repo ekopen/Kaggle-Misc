@@ -83,28 +83,40 @@ def analysis2(df, industry):
 
 def analysis3(df):
     # top # of companies by industry
+    #get top 'x'' companies by industry and add some calculated columns
     df = df[['Organization Name','Industry Nickname','Revenue (Billions)','Profits (Billions)','Market Value (Billions)',
-         'Total Employees']].groupby('Industry Nickname').head(5).reset_index().reset_index()
+         'Total Employees']].groupby('Industry Nickname').head(5)
     df = calculate_columns(df)
+    #create a grouped df to sort by aggregated ptofit per employee of industries by top 'x' companies
+    #resetting index to 'Industry Nickname' so I can pair it up with other df
+    dfgrouped = df.groupby('Industry Nickname').agg('sum').sort_values(by='Profits per Employee',
+        ascending=False).reset_index().set_index("Industry Nickname")
+    #need a numeric order of industry rankings for a later sort
+    num_of_rankings = []
+    for x in range(len(dfgrouped)):
+        num_of_rankings.append(x)
+    dfgrouped['Industry Rank'] = num_of_rankings
+    
+    df = df.set_index("Industry Nickname")
+
+    # sort_values(by=['Industry Nickname', 'Profits per Employee'], ascending=[True, False]).reset_index()
     # df = df.sort_values(by=['Industry Nickname','Profits per Employee'], ascending=[True,False])
     #I WANT TO SORT THIS BY PROFIT PER EMPOYEE OF COMPANIES USING THE MAP FUNCTION
     #df.set_index("name", inplace = True)
-    dfgrouped = df.groupby('Industry Nickname').agg('sum')
-    return df
+    return dfgrouped
 
 
 df_cleaned_filtered = data_clean_filter(df_original)
 
-DF_grouped_analysis = analysis1(df_cleaned_filtered)
+# DF_grouped_analysis = analysis1(df_cleaned_filtered)
 DF_grouped_analysis_2 = analysis3(df_cleaned_filtered)
 
-for x in range(len(DF_grouped_analysis.index)):
-    print(DF_grouped_analysis.index.tolist()[x])
+print(DF_grouped_analysis_2)
 
-print('The five MOST profitable industries per employee are: ' +  str((DF_grouped_analysis.index.tolist()[0:5])))
-print('The five LEAST profitable industries per employee are: ' +  str((DF_grouped_analysis.index.tolist()[-5:])))
-
-
+# for x in range(len(DF_grouped_analysis.index)):
+#     print(DF_grouped_analysis.index.tolist()[x])
+# print('The five MOST profitable industries per employee are: ' +  str((DF_grouped_analysis.index.tolist()[0:5])))
+# print('The five LEAST profitable industries per employee are: ' +  str((DF_grouped_analysis.index.tolist()[-5:])))
 
 # bar = DF_grouped_analysis['Profits per Employee'].plot(x='Industry', y='Profit/Employee', kind='bar')
 
