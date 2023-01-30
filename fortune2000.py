@@ -109,23 +109,6 @@ ax.set_title('Industries by average profit per employee',
 ax.xaxis.set_major_formatter('${x:1,.0f}')
 plt.show()
 
-# df_gi_dict = df_grouped_industries.set_index('Industry Nickname')['Profits per Employee'].to_dict()
-#
-# industries = list(df_gi_dict.keys())
-# profit_per_employee = list(df_gi_dict.values())
-#
-# fig = plt.figure(figsize=(10, 5))
-#
-# # creating the bar plot
-# plt.bar(industries, profit_per_employee, color='maroon',
-#         width=0.4)
-#
-# plt.xlabel("Industries")
-# plt.ylabel("Profit per Employee")
-# plt.title("Profit per Employee by Industry")
-# plt.inverse_yaxis()
-# plt.show()
-
 
 # print('Select one industry to retrieve a dataframe for: ')
 # industry_specifier = input()
@@ -138,5 +121,3 @@ plt.show()
 # df_specific_industry_analysis = analysis2(df_cleaned_filtered, industry_specifier)
 
 df_top_5_companies_by_industry = analysis3(df_cleaned_filtered)
-
-
