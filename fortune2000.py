@@ -21,7 +21,7 @@ def data_clean_filter(df):
     #filtering out holding companies with low employee count (these have weird metrics that skew the analysis)
     # and any non-US companies (not sure what their reporting standards are)
     # filtering out automotive which only has two companies for some reason
-    df = df[(df['Total Employees']>1000) & (df['Country']=='United States') & (df['Industry'] != 'Automotive') &
+    df = df[(df['Total Employees']>3000) & (df['Country']=='United States') & (df['Industry'] != 'Automotive') &
     (df['Industry'] != 'Consumer Durables')]
     # creating nicknames for the columns, as industry names are a bit long
     df['Industry Nickname'] = df['Industry']
@@ -75,8 +75,9 @@ def analysis1(df):
 
 def analysis3(df):
     # top # of companies by industry
+    num_top_industries = 5
     dfgrouped = analysis1(df)
-    num_top_companies = 5
+    num_top_companies = 10
     dfa3 = calculate_columns(df).sort_values(by=['Profits per Employee'], ascending=False)
     #get top 'x'' companies by industry and add some calculated columns
     dfa3 = dfa3[['Organization Name','Industry Nickname','Revenue (Billions)','Profits (Billions)','Market Value (Billions)',
@@ -87,7 +88,9 @@ def analysis3(df):
     dfgrouped_inv = {v: k for k, v in dfgrouped.items()}
 
     dfa3['Industry Rank'] = dfa3['Industry Nickname'].map(dfgrouped_inv)
-    dfa3 = dfa3.sort_values(by=['Industry Rank','Profits per Employee'], ascending=[True, False])
+    dfa3 = dfa3.sort_values(by=['Industry Rank','Profits per Employee'], ascending=[True, False]).head(
+        num_top_industries*num_top_companies
+    )
 
     return dfa3
 
@@ -100,15 +103,7 @@ print('The five MOST profitable industries per employee are: ' +  str((df_groupe
 print('The five LEAST profitable industries per employee are: ' +  str((df_grouped_industries
                                                                         ['Industry Nickname'].tolist()[-5:])))
 
-industries = df_grouped_industries['Industry Nickname']
-profit_employee = df_grouped_industries['Profits per Employee']
-fig, ax = plt.subplots(figsize =(16, 9))
-ax.barh(industries, profit_employee)
-ax.set_title('Industries by average profit per employee',
-             loc ='left' )
-ax.xaxis.set_major_formatter('${x:1,.0f}')
-plt.show()
-
+df_top_companies_by_top_industries = analysis3(df_cleaned_filtered)
 
 # print('Select one industry to retrieve a dataframe for: ')
 # industry_specifier = input()
@@ -120,4 +115,25 @@ plt.show()
 #     return dfa2
 # df_specific_industry_analysis = analysis2(df_cleaned_filtered, industry_specifier)
 
-df_top_5_companies_by_industry = analysis3(df_cleaned_filtered)
+
+# industries = df_grouped_industries['Industry Nickname']
+# profit_employee = df_grouped_industries['Profits per Employee']
+# fig, ax = plt.subplots(figsize =(16, 9))
+# ax.barh(industries, profit_employee)
+# ax.set_title('Industries by average profit per employee',
+#              loc ='left' )
+# ax.xaxis.set_major_formatter('${x:1,.0f}')
+# plt.show()
+#
+#
+#
+# companies = df_top_companies_by_top_industries['Organization Name']
+# profit_employee_v2 = df_top_companies_by_top_industries['Profits per Employee']
+# fig, ax = plt.subplots(figsize =(16, 9))
+# ax.barh(companies, profit_employee_v2)
+# ax.set_title('Industries by average profit per employee',
+#              loc ='left' )
+# ax.xaxis.set_major_formatter('${x:1,.0f}')
+# plt.show()
+
+
