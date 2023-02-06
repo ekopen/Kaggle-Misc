@@ -22,3 +22,26 @@ for x in range(len(df.index)):
         df.iloc[x,5] = average_pm
 
 df['Profit (in millions)'] = df['Revenue (in millions)'] * df['Profit Margin']
+df_focus = df[df['Year'] == 2003].sort_values(by=['Profit (in millions)'], ascending=True)
+dfgrouped = df.groupby('Year').agg('sum').reset_index()
+dfgrouped['Profit Margin'] = dfgrouped['Profit (in millions)'] / dfgrouped['Revenue (in millions)']
+
+df_dict = {}
+
+for x in dfgrouped['Year']:
+    df_dict[x] = df[df['Year'] == x]
+
+print(df_dict)
+
+# x2 = df['Year']
+# y3 = df['Profit Margin']
+# z = np.polyfit(x2, y3, 1)
+# p = np.poly1d(z)
+#
+# plt.plot(x2, y3, label="Profit Margin")
+# plt.plot(x2, p(x2), label="Profit Margin")
+# plt.xlabel("Year")
+# plt.ylabel("%")
+# plt.title("F500 Profit Margin Over Time")
+# plt.show()
+
