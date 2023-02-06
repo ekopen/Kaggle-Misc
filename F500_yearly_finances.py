@@ -5,18 +5,20 @@ import matplotlib.pyplot as plt
 # find the dataset source here:
 # https://www.kaggle.com/datasets/yashsrivastava51213/revenue-and-profit-of-fortune-500-companies?select=fortune500.csv
 pd.read_csv(r'C:\Users\ekopen\Documents\Kaggle\fortune500.csv').to_pickle('./fortune500.pkl')
-df_original = pd.read_pickle('fortune500.pkl')
+df = pd.read_pickle('fortune500.pkl')
 
-# print(df_original.keys())
+df = df[df['Rank'] <= 500]
+average_pm = .08
+df['Profit Margin'] = 0
 
-df_grouped = df_original[['Year','Revenue (in millions)','Profit (in millions)']].groupby('Year').agg('sum')
+df['Revenue (in millions)'] = pd.to_numeric(df['Revenue (in millions)'].str.replace(',',''))
 
-x = df_grouped['Year']
-y1 = df_grouped['Revenue (in millions']
-# y2 = df_grouped['Profit (in millions']
+df['Profit (in millions)'] = df['Profit (in millions)'].str.replace(',','')
 
-plt.plot(x, y1)
-plt.xlabel("X-axis")  # add X-axis label
-plt.ylabel("Y-axis")  # add Y-axis label
-plt.title("Any suitable title")  # add title
-plt.show()
+for x in range(len(df.index)):
+    if df.iloc[x,4] != 'N.A.':
+        df.iloc[x,5] = pd.to_numeric(df.iloc[x,4])/df.iloc[x,3]
+    else:
+        df.iloc[x,5] = average_pm
+
+df['Profit (in millions)'] = df['Revenue (in millions)'] * df['Profit Margin']
