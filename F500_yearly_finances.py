@@ -21,24 +21,29 @@ import matplotlib.pyplot as plt
 # df.to_pickle('./cleaneddf.pkl')
 
 df = pd.read_pickle(r"C:\Users\ekopen\PycharmProjects\pythonProject\cleaneddf.pkl")
-df_focus = df[(df['Year'] >= 2001) & (df['Year'] <= 2001)]
-dfgrouped = df.groupby('Year').agg('sum').reset_index()
+df_focus = df[(df['Year'] >= 2000) & (df['Year'] <= 2005)]
+dfgrouped = df_focus.groupby('Year').agg('sum').reset_index()
 dfgrouped['Profit Margin'] = dfgrouped['Profit (in millions)'] / dfgrouped['Revenue (in millions)']
 
 df_dict = {}
 year_dict = {}
 
 for x in dfgrouped['Year']:
-    year_dict['DF'] = df[df['Year'] == x]
+    year_dict['DF'] = df_focus[df_focus['Year'] == x]
     year_dict['Average PM'] = np.average(year_dict['DF']['Profit Margin'], weights=year_dict['DF']['Revenue (in millions)'])
     year_dict['Std Dev PM'] = np.std(year_dict['DF']['Profit Margin'])
     year_dict['Upper Bound'] = (year_dict['Std Dev PM'] + year_dict['Std Dev PM'] * 3)
     year_dict['Lower Bound'] = (year_dict['Std Dev PM'] + year_dict['Std Dev PM'] * -3)
-    df_dict[x] = year_dict
+    ###WIP
+    # bound_test = []
+    # for x in range(len(year_dict['DF']['Profit Margin'])):
+    #     if (year_dict['DF']['Profit Margin'][x] > year_dict['Upper Bound'] or year_dict['DF']['Profit Margin'][x] < year_dict['Lower Bound']):
+    #         bound_test.append(0)
+    #     else:
+    #         bound_test.append(1)
+    # year_dict['Bounds'] = bound_test
+    ###WIP
     year_dict = {}
-
-for x in df_dict:
-    print(df_dict)
 
 # x2 = df['Year']
 # y3 = df['Profit Margin']
