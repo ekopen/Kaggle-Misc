@@ -8,6 +8,8 @@ pd.options.mode.chained_assignment = None  # default='warn'
 # pd.read_csv(r'C:\Users\ekopen\Documents\Kaggle\fortune500.csv').to_pickle('./fortune500.pkl')
 # df = pd.read_pickle('fortune500.pkl')
 #
+
+# #cleaning the dataset
 # df = df[df['Rank'] <= 500]
 # df['Revenue (in millions)'] = pd.to_numeric(df['Revenue (in millions)'].str.replace(',',''))
 # df['Profit (in millions)'] = df['Profit (in millions)'].str.replace(',','')
@@ -21,13 +23,14 @@ pd.options.mode.chained_assignment = None  # default='warn'
 # df['Profit (in millions)'] = df['Revenue (in millions)'] * df['Profit Margin']
 # df.to_pickle('./cleaneddf.pkl')
 
+#group the dataset for initial analysis
 df = pd.read_pickle(r"C:\Users\ekopen\PycharmProjects\pythonProject\cleaneddf.pkl")
 df_focus = df[(df['Year'] >= 1955) & (df['Year'] <= 2009)]
 dfgrouped = df_focus.groupby('Year').agg('sum').reset_index()
 dfgrouped['Profit Margin'] = dfgrouped['Profit (in millions)'] / dfgrouped['Revenue (in millions)']
 
+#create a dictionary with some statistical info to get rid of outliers
 df_dict = {}
-
 for x in dfgrouped['Year']:
     year_dict = {}
     year_dict['DF'] = df_focus[df_focus['Year'] == x]
@@ -44,6 +47,7 @@ for x in dfgrouped['Year']:
     year_dict['DF']['In Bounds?'] = bound_test
     df_dict[x] = year_dict
 
+#reconsolidate the dictionary with stat info
 filtereddf = pd.DataFrame()
 for keys in df_dict:
     filtereddf = filtereddf.append(df_dict[keys]['DF'], ignore_index=True)
@@ -51,11 +55,11 @@ filtereddf = filtereddf[filtereddf['In Bounds?'] == 1]
 filtereddf = filtereddf.groupby('Year').agg('sum').reset_index()
 filtereddf['Profit Margin'] = filtereddf['Profit (in millions)'] / filtereddf['Revenue (in millions)']
 
+#graph it
 x2 = filtereddf['Year']
 y3 = filtereddf['Profit Margin']
 z = np.polyfit(x2, y3, 1)
 p = np.poly1d(z)
-
 plt.plot(x2, y3, label="Profit Margin")
 plt.plot(x2, p(x2), label="Profit Margin")
 plt.xlabel("Year")
