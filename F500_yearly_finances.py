@@ -44,7 +44,9 @@ for x in dfgrouped['Year']:
     year_dict['DF']['Bounds'] = bound_test
     df_dict[x] = year_dict
 
-print(df_dict)
+print(df_dict[2001])
+
+dftest = df_dict[2001]['DF'].sort_values(by=['Profit Margin'], ascending=False)
 
 # x2 = df['Year']
 # y3 = df['Profit Margin']
