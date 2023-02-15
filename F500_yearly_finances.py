@@ -2,12 +2,14 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 pd.options.mode.chained_assignment = None  # default='warn'
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+#some of this data seems to be inaccurate, for example GE took a big loss in 1992 not 1993
 
 # find the dataset source here:
 # https://www.kaggle.com/datasets/yashsrivastava51213/revenue-and-profit-of-fortune-500-companies?select=fortune500.csv
 # pd.read_csv(r'C:\Users\ekopen\Documents\Kaggle\fortune500.csv').to_pickle('./fortune500.pkl')
 # df = pd.read_pickle('fortune500.pkl')
-#
 
 # #cleaning the dataset
 # df = df[df['Rank'] <= 500]
@@ -25,22 +27,29 @@ pd.options.mode.chained_assignment = None  # default='warn'
 
 #group the dataset for initial analysis
 df = pd.read_pickle(r"C:\Users\ekopen\PycharmProjects\pythonProject\cleaneddf.pkl")
-df_focus = df[(df['Year'] >= 1955) & (df['Year'] <= 2009)]
+df_focus = df[(df['Year'] >= 2005) & (df['Year'] <= 2009)]
 dfgrouped = df_focus.groupby('Year').agg('sum').reset_index()
 dfgrouped['Profit Margin'] = dfgrouped['Profit (in millions)'] / dfgrouped['Revenue (in millions)']
 
 #create a dictionary with some statistical info to get rid of outliers
 df_dict = {}
+boundlist = [-3, -2, -1, 1, 2, 3]
+boundlistlong = []
+for x in boundlist:
+    boundlistlong.append('Bound ' + str(x))
+upperbound = 1
+lowerbound = -1
+
 for x in dfgrouped['Year']:
     year_dict = {}
     year_dict['DF'] = df_focus[df_focus['Year'] == x]
     year_dict['Average PM'] = np.average(year_dict['DF']['Profit Margin'], weights=year_dict['DF']['Revenue (in millions)'])
     year_dict['Std Dev PM'] = np.std(year_dict['DF']['Profit Margin'])
-    year_dict['Upper Bound'] = (year_dict['Std Dev PM'] + year_dict['Std Dev PM'] * 2)
-    year_dict['Lower Bound'] = (year_dict['Std Dev PM'] + year_dict['Std Dev PM'] * -2)
+    for y in boundlist:
+        year_dict['Bound ' + str(y)] = (year_dict['Average PM'] + year_dict['Std Dev PM'] * y)
     bound_test = []
-    for y in range(len(year_dict['DF']['Profit Margin'])):
-        if (year_dict['DF'].iloc[y,5] > year_dict['Upper Bound']) or (year_dict['DF'].iloc[y,5] < year_dict['Lower Bound']):
+    for z in range(len(year_dict['DF']['Profit Margin'])):
+        if (year_dict['DF'].iloc[z,5] > year_dict['Bound ' + str(upperbound)]) or (year_dict['DF'].iloc[z,5] < year_dict['Bound ' + str(lowerbound)]):
             bound_test.append(0)
         else:
             bound_test.append(1)
@@ -56,6 +65,15 @@ filtereddf = filtereddf.groupby('Year').agg('sum').reset_index()
 filtereddf['Profit Margin'] = filtereddf['Profit (in millions)'] / filtereddf['Revenue (in millions)']
 
 #create an annual standard deviation distribution by year to append on graph
+bounds_dict = {}
+yearlybounds = []
+for keys in df_dict:
+    for x in boundlistlong:
+        yearlybounds.append(df_dict[keys][str(x)])
+    bounds_dict[keys] = yearlybounds
+    yearlybounds = []
+boundsdf = pd.DataFrame.from_dict(bounds_dict).transpose()
+boundsdf.columns = boundlistlong
 
 #graph it
 x2 = filtereddf['Year']
