@@ -55,6 +55,8 @@ filtereddf = filtereddf[filtereddf['In Bounds?'] == 1]
 filtereddf = filtereddf.groupby('Year').agg('sum').reset_index()
 filtereddf['Profit Margin'] = filtereddf['Profit (in millions)'] / filtereddf['Revenue (in millions)']
 
+#create an annual standard deviation distribution by year to append on graph
+
 #graph it
 x2 = filtereddf['Year']
 y3 = filtereddf['Profit Margin']
@@ -66,4 +68,3 @@ plt.xlabel("Year")
 plt.ylabel("%")
 plt.title("F500 Profit Margin Over Time")
 plt.show()
-
