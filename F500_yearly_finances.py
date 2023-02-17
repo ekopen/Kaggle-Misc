@@ -27,7 +27,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 #group the dataset for initial analysis
 df = pd.read_pickle(r"C:\Users\ekopen\PycharmProjects\pythonProject\cleaneddf.pkl")
-df_focus = df[(df['Year'] >= 1955) & (df['Year'] <= 2009)]
+df_focus = df[(df['Year'] >= 1980) & (df['Year'] <= 2009)]
 dfgrouped = df_focus.groupby('Year').agg('sum').reset_index()
 dfgrouped['Profit Margin'] = dfgrouped['Profit (in millions)'] / dfgrouped['Revenue (in millions)']
 
@@ -76,11 +76,18 @@ boundsdf = pd.DataFrame.from_dict(bounds_dict).transpose()
 boundsdf.columns = boundlistlong
 boundsdf = boundsdf.reset_index().rename(columns={"index": "Year"})
 
-merged_df = filtereddf.merge(boundsdf, left_on="Year", right_on="Year")
+merged_df = filtereddf.merge(boundsdf, left_on="Year", right_on="Year")[
+    ['Year','Profit Margin','Bound -1','Bound 1']]
 
-# #graph it
+#graph it
+plt.style.use('seaborn-v0_8')
+my_dpi=96
+plt.figure(figsize=(480/my_dpi, 480/my_dpi), dpi=my_dpi)
+for column in merged_df.drop('Year', axis=1):
+    plt.plot(merged_df['Year'], merged_df[column], marker='', color='grey', linewidth=1, alpha=0.4)
+plt.plot(merged_df['Year'], merged_df['Profit Margin'], marker='', color='orange', linewidth=3, alpha=1)
 # x = merged_df['Year']
-# y = [merged_df['Profit Margin'],merged_df['Bound 1']]
+# y = merged_df['Profit Margin']
 # # z = np.polyfit(x2, y3, 1)
 # # p = np.poly1d(z)
 # plt.plot(x, y, label="Profit Margin")
@@ -88,4 +95,6 @@ merged_df = filtereddf.merge(boundsdf, left_on="Year", right_on="Year")
 # plt.xlabel("Year")
 # plt.ylabel("%")
 # plt.title("F500 Profit Margin Over Time")
-# plt.show()
+
+plt.show()
+
