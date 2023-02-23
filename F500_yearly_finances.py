@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 pd.options.mode.chained_assignment = None  # default='warn'
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -27,7 +28,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 #group the dataset for initial analysis
 df = pd.read_pickle(r"C:\Users\ekopen\PycharmProjects\pythonProject\cleaneddf.pkl")
-df_focus = df[(df['Year'] >= 1980) & (df['Year'] <= 2009)]
+df_focus = df[(df['Year'] >= 1955) & (df['Year'] <= 2009)]
 dfgrouped = df_focus.groupby('Year').agg('sum').reset_index()
 dfgrouped['Profit Margin'] = dfgrouped['Profit (in millions)'] / dfgrouped['Revenue (in millions)']
 
@@ -83,18 +84,12 @@ merged_df = filtereddf.merge(boundsdf, left_on="Year", right_on="Year")[
 plt.style.use('seaborn-v0_8')
 my_dpi=96
 plt.figure(figsize=(480/my_dpi, 480/my_dpi), dpi=my_dpi)
-for column in merged_df.drop('Year', axis=1):
-    plt.plot(merged_df['Year'], merged_df[column], marker='', color='grey', linewidth=1, alpha=0.4)
-plt.plot(merged_df['Year'], merged_df['Profit Margin'], marker='', color='orange', linewidth=3, alpha=1)
-# x = merged_df['Year']
-# y = merged_df['Profit Margin']
-# # z = np.polyfit(x2, y3, 1)
-# # p = np.poly1d(z)
-# plt.plot(x, y, label="Profit Margin")
-# # plt.plot(x2, p(x2), label="Profit Margin")
-# plt.xlabel("Year")
-# plt.ylabel("%")
-# plt.title("F500 Profit Margin Over Time")
-
+plt.plot(merged_df['Year'], merged_df['Bound 1'], marker='', color='green', linewidth=1, alpha=.6,
+         label='Upper Std Dev')
+plt.plot(merged_df['Year'], merged_df['Bound -1'], marker='', color='maroon', linewidth=1, alpha=.6,
+         label='Lower Std Dev')
+plt.plot(merged_df['Year'], merged_df['Profit Margin'], marker='', color='orange', linewidth=2, alpha=1,
+         label='Avg Profit Margin')
+plt.legend()
+plt.gca().yaxis.set_major_formatter(mtick.PercentFormatter(xmax=1.0))
 plt.show()
-
